@@ -78,6 +78,21 @@ class Genre(Base):
     type = Column(String(255))
 
 
+class Language(Base):
+    __tablename__ = "language"
+    id = Column(Integer, Sequence("language_id_seq"), primary_key=True, index=True)
+    movie_id = Column(Integer)
+    type = Column(String(255))
+
+
+class Country(Base):
+    __tablename__ = "country"
+    id = Column(Integer, Sequence("country_id_seq"), primary_key=True, index=True)
+    movie_id = Column(Integer)
+    type = Column(String(255))
+
+
+
 Base.metadata.create_all(bind=engine)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -185,6 +200,20 @@ def get_movie_info(title: str):
                 genre = Genre(movie_id=db_movie.id,
                               type=genre_name)
                 db.add(genre)
+                db.commit()
+
+            language_names = omdb_data.get("Language", "").split(", ")
+            for language_name in language_names:
+                language = Language(movie_id=db_movie.id,
+                                    type=language_name)
+                db.add(language)
+                db.commit()
+
+            country_names = omdb_data.get("Country", "").split(", ")
+            for country_name in country_names:
+                country = Country(movie_id=db_movie.id,
+                                    type=country_name)
+                db.add(country)
                 db.commit()
 
             get_or_create_artist(db, omdb_data["Director"], db_movie.id, "Director")
